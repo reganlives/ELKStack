@@ -13,7 +13,7 @@ variable "name" {
 
 variable "ami_id" {
   type    = string
-  default = "ami-0fb653ca2d3203ac1"
+  default = "ami-089a545a9ed9893b6"
 }
 
 variable "ssh_key" {

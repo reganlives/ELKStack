@@ -32,7 +32,7 @@ resource "aws_main_route_table_association" "elastic_rt_main" {
 }
 
 resource "aws_subnet" "elastic_subnet"{
-  for_each = {us-east-1a=cidrsubnet("172.20.0.0/16",8,10),us-east-1b=cidrsubnet("172.20.0.0/16",8,20),us-east-1c=cidrsubnet("172.20.0.0/16",8,30)}
+  for_each = {us-east-2a=cidrsubnet("172.20.0.0/16",8,10),us-east-2b=cidrsubnet("172.20.0.0/16",8,20),us-east-2c=cidrsubnet("172.20.0.0/16",8,30)}
   vpc_id = aws_vpc.elastic_vpc.id
   availability_zone = each.key
   cidr_block = each.value
@@ -43,7 +43,7 @@ resource "aws_subnet" "elastic_subnet"{
 
 variable "az_name" {
   type    = list(string)
-  default = ["us-east-1a","us-east-1b","us-east-1c"]
+  default = ["us-east-2a","us-east-2b","us-east-2c"]
   
 }
 
@@ -77,18 +77,18 @@ resource "aws_security_group" "elasticsearch_sg" {
   }
 }
 
-resource "aws_key_pair" "elastic_ssh_key" {
-  key_name= "new_key1"
-  public_key= var.ssh_key
-}
+# resource "aws_key_pair" "elastic_ssh_key" {
+#   key_name= "new_key2"
+#   public_key= var.ssh_key
+# }
 
 resource "aws_instance" "elastic_nodes" {
   count = 3
-  ami                    = "ami-04d29b6f966df1537"
+  ami                    = var.ami_id
   instance_type          = "t2.large"
   subnet_id = aws_subnet.elastic_subnet[var.az_name[count.index]].id
   vpc_security_group_ids = [aws_security_group.elasticsearch_sg.id]
-  key_name               = aws_key_pair.elastic_ssh_key.key_name
+  key_name               = var.ssh_key
   associate_public_ip_address = true
   tags = {
     Name = "elasticsearch_${count.index}"
@@ -116,7 +116,7 @@ resource "null_resource" "move_elasticsearch_file" {
   connection {
      type = "ssh"
      user = "ec2-user"
-     private_key = var.ssh_key
+     private_key = "c:/Users/r.javed/.ssh/new_key1.pem"
      host= aws_instance.elastic_nodes[count.index].public_ip
   } 
   provisioner "file" {
@@ -191,7 +191,7 @@ resource "aws_instance" "kibana" {
   instance_type          = "t2.large"
   subnet_id = aws_subnet.elastic_subnet[var.az_name[0]].id
   vpc_security_group_ids = [aws_security_group.kibana_sg.id]
-  key_name               = aws_key_pair.elastic_ssh_key.key_name
+  key_name               = var.ssh_key
   associate_public_ip_address = true
   tags = {
     Name = "kibana"
@@ -283,7 +283,7 @@ resource "aws_instance" "logstash" {
   instance_type          = "t2.large"
   subnet_id = aws_subnet.elastic_subnet[var.az_name[0]].id
   vpc_security_group_ids = [aws_security_group.logstash_sg.id]
-  key_name               = aws_key_pair.elastic_ssh_key.key_name
+  key_name               = var.ssh_key
   associate_public_ip_address = true
   tags = {
     Name = "logstash"
@@ -369,7 +369,7 @@ resource "aws_instance" "filebeat" {
   instance_type          = "t2.large"
   subnet_id = aws_subnet.elastic_subnet[var.az_name[0]].id
   vpc_security_group_ids = [aws_security_group.filebeat_sg.id]
-  key_name               = aws_key_pair.elastic_ssh_key.key_name
+  key_name               = var.ssh_key
   associate_public_ip_address = true
   tags = {
     Name = "filebeat"
