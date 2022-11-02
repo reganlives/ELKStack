@@ -116,7 +116,7 @@ resource "null_resource" "move_elasticsearch_file" {
   connection {
      type = "ssh"
      user = "ec2-user"
-     private_key = "c:/Users/r.javed/.ssh/new_key1.pem"
+     private_key = file("C:/Users/r.javed/.ssh/new_key1.pem")
      host= aws_instance.elastic_nodes[count.index].public_ip
   } 
   provisioner "file" {
@@ -133,7 +133,7 @@ resource "null_resource" "start_es" {
   connection {
      type = "ssh"
      user = "ec2-user"
-     private_key = var.ssh_key
+     private_key = file("C:/Users/r.javed/.ssh/new_key1.pem")
      host= aws_instance.elastic_nodes[count.index].public_ip
   }
   provisioner "remote-exec" {
@@ -187,7 +187,7 @@ resource "aws_instance" "kibana" {
   depends_on = [ 
     null_resource.start_es
    ]
-  ami                    = "ami-04d29b6f966df1537"
+  ami                    = var.ami_id
   instance_type          = "t2.large"
   subnet_id = aws_subnet.elastic_subnet[var.az_name[0]].id
   vpc_security_group_ids = [aws_security_group.kibana_sg.id]
@@ -213,7 +213,7 @@ resource "null_resource" "move_kibana_file" {
   connection {
      type = "ssh"
      user = "ec2-user"
-     private_key = var.ssh_key
+     private_key = file("C:/Users/r.javed/.ssh/new_key1.pem")
      host= aws_instance.kibana.public_ip
   } 
   provisioner "file" {
@@ -230,7 +230,7 @@ resource "null_resource" "install_kibana" {
   connection {
     type = "ssh"
     user = "ec2-user"
-    private_key = var.ssh_key
+    private_key = file("C:/Users/r.javed/.ssh/new_key1.pem")
     host= aws_instance.kibana.public_ip
   } 
   provisioner "remote-exec" {
@@ -279,7 +279,7 @@ resource "aws_instance" "logstash" {
   depends_on = [ 
     null_resource.install_kibana
    ]
-  ami                    = "ami-04d29b6f966df1537"
+  ami                    = var.ami_id
   instance_type          = "t2.large"
   subnet_id = aws_subnet.elastic_subnet[var.az_name[0]].id
   vpc_security_group_ids = [aws_security_group.logstash_sg.id]
@@ -307,7 +307,7 @@ resource "null_resource" "move_logstash_file" {
   connection {
      type = "ssh"
      user = "ec2-user"
-     private_key = var.ssh_key
+     private_key = file("C:/Users/r.javed/.ssh/new_key1.pem")
      host= aws_instance.logstash.public_ip
   } 
   provisioner "file" {
@@ -324,7 +324,7 @@ resource "null_resource" "install_logstash" {
   connection {
     type = "ssh"
     user = "ec2-user"
-    private_key = var.ssh_key
+    private_key = file("C:/Users/r.javed/.ssh/new_key1.pem")
     host= aws_instance.logstash.public_ip
   } 
   provisioner "remote-exec" {
@@ -365,7 +365,7 @@ resource "aws_instance" "filebeat" {
   depends_on = [ 
     null_resource.install_logstash
    ]
-  ami                    = "ami-04d29b6f966df1537"
+  ami                    = var.ami_id
   instance_type          = "t2.large"
   subnet_id = aws_subnet.elastic_subnet[var.az_name[0]].id
   vpc_security_group_ids = [aws_security_group.filebeat_sg.id]
@@ -384,7 +384,7 @@ resource "null_resource" "move_filebeat_file" {
   connection {
      type = "ssh"
      user = "ec2-user"
-     private_key = var.ssh_key
+     private_key = file("C:/Users/r.javed/.ssh/new_key1.pem")
      host= aws_instance.filebeat.public_ip
   } 
   provisioner "file" {
@@ -401,7 +401,7 @@ resource "null_resource" "install_filebeat" {
   connection {
     type = "ssh"
     user = "ec2-user"
-    private_key = var.ssh_key
+    private_key = file("C:/Users/r.javed/.ssh/new_key1.pem")
     host= aws_instance.filebeat.public_ip
   } 
   provisioner "remote-exec" {
